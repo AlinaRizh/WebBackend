@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $forma = [];
     if (isset($_COOKIE['savedForma']) && !empty($_COOKIE['savedForma'])) {
         $forma = json_decode($_COOKIE['savedForma'], true);
-    } else {
+    } elseif (isset($_COOKIE['forma'])) {
         $forma = json_decode($_COOKIE['forma'], true);
     }
 
