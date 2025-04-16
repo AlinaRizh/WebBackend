@@ -67,6 +67,7 @@ if (empty($_POST['contract'])) {
 if (!empty($errors)) {
     setcookie('errors', json_encode($errors), 0, '/');
     setcookie('forma', json_encode($forma), 0, '/');
+    setcookie('savedForma', json_encode($forma), 0, '/');
     header('Location: ' . $_SERVER['PHP_SELF']);
     exit();
 }
