@@ -14,15 +14,6 @@
     if (!empty($_COOKIE['errors'])) {
       $errors = json_decode($_COOKIE['errors'], true) ?? [];
     }    
-    $forma = [];
-    if (!empty($_COOKIE['forma'])) {
-      $forma = json_decode($_COOKIE['forma'], true) ?? [];
-    } 
-    if (!empty($_COOKIE['savedForma'])) {
-      $forma = json_decode($_COOKIE['savedForma'], true) ?? [];
-    }
-    $allowed_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python', 'Java', 'Haskel', 'Clojure', 'Prolog', 'Scala', 'Go'];
-    $currLang = $forma['language'] ?? [];
   ?>
   <?php if (!empty($errors)): ?>
     <div class="errors">

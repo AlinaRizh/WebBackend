@@ -8,8 +8,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     if (isset($_GET['sendmsg']) && $_GET['sendmsg'] == '1') {
         echo '<div class="success">Форма отправлена!</div>';
     }
-    setcookie('errors', '', time() - 3600, '/');
-    setcookie('forma', '', time() - 3600, '/');
+
+    $errors = json_decode($_COOKIE['errors'] ?? '', true) ?: [];
+    $forma = [];
+    if (isset($_COOKIE['savedForma']) && !empty($_COOKIE['savedForma'])) {
+        $forma = json_decode($_COOKIE['savedForma'], true);
+    } else {
+        $forma = json_decode($_COOKIE['forma'], true);
+    }
+
     include('form.php');
     exit();
 }
@@ -31,7 +38,7 @@ if (empty($_POST['name'])) {
 if (empty($_POST['phone'])) {
     $errors['phone'] = 'Введите корректно телефон!';
 } elseif (!preg_match('/^\+7[0-9]{10}$/', $_POST['phone'])) {
-    $errors['phone'] = 'Номер телефона должен начинаться с +7 либо 8!';
+    $errors['phone'] = 'Номер телефона должен начинаться с +7!';
 }
 if (empty($_POST['email'])) {
     $errors['email'] = 'Введите корректный Email!';
@@ -65,9 +72,10 @@ if (empty($_POST['contract'])) {
     $errors['contract'] = 'Необходимо подтверждение!';
 }
 if (!empty($errors)) {
-    setcookie('errors', json_encode($errors), 0, '/');
+    setcookie('savedForma', '', time() - 3600, '/');
     setcookie('forma', json_encode($forma), 0, '/');
-    setcookie('savedForma', json_encode($forma), 0, '/');
+    setcookie('errors', json_encode($errors), 0, '/');
+
     header('Location: ' . $_SERVER['PHP_SELF']);
     exit();
 }
@@ -103,10 +111,9 @@ try {
 
     $db->commit();
 
-    setcookie('savedForma', json_encode($forma), time() + 60 * 60 * 24 * 365, '/');
-
     setcookie('errors', '', time() - 3600, '/');
     setcookie('forma', '', time() - 3600, '/');
+    setcookie('savedForma', $forma, time() + 60 * 60 * 24 * 365, '/');
 
     header('Location: ?sendmsg=1');
     exit();
