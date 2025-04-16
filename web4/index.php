@@ -5,6 +5,9 @@ $allowed_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python', 'Java
 $allowed_sex = ['Мужской', 'Женский'];
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    if (isset($_GET['sendmsg']) && $_GET['sendmsg'] == '1') {
+        echo '<div class="success">Форма отправлена!</div>';
+    }
     setcookie('errors', '', time() - 3600, '/');
     setcookie('forma', '', time() - 3600, '/');
     include('form.php');

@@ -17,6 +17,9 @@
     $forma = [];
     if (!empty($_COOKIE['forma'])) {
       $forma = json_decode($_COOKIE['forma'], true) ?? [];
+    } 
+    if (!empty(_COOKIE['savedForma'])) {
+      $forma = json_decode($_COOKIE['savedForma'], true) ?? [];
     }
     $allowed_languages = ['Pascal', 'C', 'C++', 'JavaScript', 'PHP', 'Python', 'Java', 'Haskel', 'Clojure', 'Prolog', 'Scala', 'Go'];
     $currLang = $forma['language'] ?? [];
