@@ -113,7 +113,7 @@ try {
 
     setcookie('errors', '', time() - 3600, '/');
     setcookie('forma', '', time() - 3600, '/');
-    setcookie('savedForma', $forma, time() + 60 * 60 * 24 * 365, '/');
+    setcookie('savedForma', json_encode($forma), time() + 60 * 60 * 24 * 365, '/');
 
     header('Location: ?sendmsg=1');
     exit();
