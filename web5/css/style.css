@@ -104,7 +104,7 @@ button[type="submit"] {
 button[type="submit"]:hover {
   background-color: #2980b9;
 }
-::placeholder {\
+::placeholder {
   color: #95a5a6;
   opacity: 1;
 }
