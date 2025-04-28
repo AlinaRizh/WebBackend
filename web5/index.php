@@ -31,6 +31,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     
     $forma = [];
     if (!empty($_SESSION['login'])) {
+        $db = new PDO("mysql:host=localhost;dbname=u69070", 'u69070', '2731078', [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8mb4'
+        ]);
+
         $stmt = $db->prepare("SELECT r.* FROM requests r JOIN users u ON r.id = u.request_id WHERE u.login = ?");
         $stmt->execute([$_SESSION['login']]);
         $forma = $stmt->fetch();
