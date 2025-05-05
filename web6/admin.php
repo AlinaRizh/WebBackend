@@ -2,29 +2,6 @@
 session_start();
 header('Content-Type: text/html; charset=UTF-8');
 
-try {
-    $db = new PDO("mysql:host=localhost;dbname=u69070", 'u69070', '2731078', [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-    ]);
-
-    $login = 'admin';
-    $password = 'admin';
-
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-    $stmt = $db->prepare("SELECT * FROM admins WHERE login = :login");
-    $stmt->execute([':login' => $login]);
-    $admin = $stmt->fetch();
-
-    if (!$admin) {
-        $stmt = $db->prepare("INSERT INTO admins (login, password) VALUES (:login, :password)");
-        $stmt->execute([':login' => $login, ':password' => $hashedPassword]);
-    }
-} catch (PDOException $e) {
-    die("Ошибка базы данных: " . $e->getMessage());
-}
-
 if (!isset($_SESSION['admin_auth']) || $_SESSION['admin_auth'] !== true) {
     if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
         header('WWW-Authenticate: Basic realm="Restricted Area"');
@@ -76,7 +53,7 @@ try {
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if (isset($_POST['DELETE'])) {
+        if (isset($_POST['delete'])) {
             $db->beginTransaction();
                 
             $stmt = $db->prepare("DELETE FROM users WHERE request_id = :id");
@@ -91,7 +68,7 @@ try {
             $db->commit();
             header("Location: admin.php");
             exit();
-        } elseif (isset($_POST['EDIT'])) {
+        } elseif (isset($_POST['edit'])) {
             $stmt = $db->prepare("SELECT r.*, GROUP_CONCAT(l.name) as languages 
                                     FROM requests r 
                                     LEFT JOIN request_languages rl ON r.id = rl.request_id 
@@ -113,7 +90,7 @@ try {
                     'languages' => $userData['languages'] ? explode(',', $userData['languages']) : []
                 ];
             }
-        } elseif (isset($_POST['UPDATE'])) {
+        } elseif (isset($_POST['update'])) {
             $db->beginTransaction();
                 
             $stmt = $db->prepare("UPDATE requests SET 
@@ -238,7 +215,7 @@ try {
                             </select>
                         </div>
                         
-                        <button type="submit" name="UPDATE" class="btn">Сохранить изменения</button>
+                        <button type="submit" name="update" class="btn">Сохранить изменения</button>
                         <a href="admin.php" class="btn btn-secondary">Вернуться к списку</a>
                     </form>
                 </div>
@@ -274,11 +251,11 @@ try {
                                 <td>
                                     <div class="action-btns">
                                         <form method="POST" style="display: inline;">
-                                            <input type="hidden" name="EDIT" value="<?= $request['id'] ?>">
+                                            <input type="hidden" name="edit" value="<?= $request['id'] ?>">
                                             <button type="submit" class="btn">Изменить</button>
                                         </form>
                                         <form method="POST" style="display: inline;" onsubmit="return confirm('Вы уверены, что хотите удалить эту запись?');">
-                                            <input type="hidden" name="DELETE" value="<?= $request['id'] ?>">
+                                            <input type="hidden" name="delete" value="<?= $request['id'] ?>">
                                             <button type="submit" class="btn btn-danger">Удалить</button>
                                         </form>
                                     </div>
