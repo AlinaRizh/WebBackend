@@ -2,11 +2,37 @@
 session_start();
 header('Content-Type: text/html; charset=UTF-8');
 
-if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
-    header('WWW-Authenticate: Basic realm="Restricted Area"');
-    header('HTTP/1.0 401 Unauthorized');
-    echo 'Требуется аутентификация.';
-    exit;
+if (!isset($_SESSION['admin_auth']) || $_SESSION['admin_auth'] !== true) {
+    if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
+        header('WWW-Authenticate: Basic realm="Restricted Area"');
+        header('HTTP/1.0 401 Unauthorized');
+        echo 'Требуется аутентификация.';
+        exit;
+    }
+
+    try {
+        $db = new PDO("mysql:host=localhost;dbname=u69070", 'u69070', '2731078', [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ]);
+
+        $stmt = $db->prepare("SELECT * FROM admins WHERE login = :login");
+        $stmt->execute([':login' => $_SERVER['PHP_AUTH_USER']]);
+        $admin = $stmt->fetch();
+
+        if (!$admin || !password_verify($_SERVER['PHP_AUTH_PW'], $admin['password'])) {
+            header('WWW-Authenticate: Basic realm="Restricted Area"');
+            header('HTTP/1.0 401 Unauthorized');
+            echo 'Неверные учетные данные.';
+            exit;
+        }
+
+        $_SESSION['admin_auth'] = true;
+        $_SESSION['admin_login'] = $_SERVER['PHP_AUTH_USER'];
+        
+    } catch (PDOException $e) {
+        die("Ошибка базы данных: " . $e->getMessage());
+    }
 }
 
 try {
