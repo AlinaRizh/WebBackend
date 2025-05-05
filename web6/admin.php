@@ -2,6 +2,29 @@
 session_start();
 header('Content-Type: text/html; charset=UTF-8');
 
+try {
+    $db = new PDO("mysql:host=localhost;dbname=u69070", 'u69070', '2731078', [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+    ]);
+
+    $login = 'admin';
+    $password = 'admin';
+
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+    $stmt = $db->prepare("SELECT * FROM admins WHERE login = :login");
+    $stmt->execute([':login' => $login]);
+    $admin = $stmt->fetch();
+
+    if (!$admin) {
+        $stmt = $db->prepare("INSERT INTO admins (login, password) VALUES (:login, :password)");
+        $stmt->execute([':login' => $login, ':password' => $hashedPassword]);
+    }
+} catch (PDOException $e) {
+    die("Ошибка базы данных: " . $e->getMessage());
+}
+
 if (!isset($_SESSION['admin_auth']) || $_SESSION['admin_auth'] !== true) {
     if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
         header('WWW-Authenticate: Basic realm="Restricted Area"');
