@@ -41,17 +41,6 @@ try {
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
     ]);
 
-    $stmt = $db->prepare("SELECT * FROM admins WHERE login = :login");
-    $stmt->execute([':login' => $_SERVER['PHP_AUTH_USER']]);
-    $admin = $stmt->fetch();
-
-    if (!$admin || !password_verify($_SERVER['PHP_AUTH_PW'], $admin['password'])) {
-        header('WWW-Authenticate: Basic realm="Restricted Area"');
-        header('HTTP/1.0 401 Unauthorized');
-        echo 'Неверные учетные данные.';
-        exit;
-    }
-
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_POST['delete'])) {
             $db->beginTransaction();
