@@ -9,7 +9,7 @@ header("Content-Security-Policy: defaut-src 'self'; script-src 'self'");
 
 session_start();
 
-$cfg = parse_ini_file('/config.ini');
+$cfg = parse_ini_file('./config.ini');
 $username = $cfg['database_username'];
 $password = $cfg['database_password'];
 
