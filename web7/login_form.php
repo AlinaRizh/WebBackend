@@ -18,6 +18,7 @@
         <?php endif; ?>
         
         <form method="POST">
+           <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
             <div class="form-group">
                 <label for="login">Логин:</label>
                 <input type="text" id="login" name="login" value="<?= htmlspecialchars($_POST['login'] ?? '', ENT_QUOTES, 'UTF-8') ?>">

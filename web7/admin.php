@@ -3,8 +3,19 @@ header('Content-Type: text/html; charset=UTF-8');
 header("X-XSS-Protection: 1; mode=block");
 header("Content-Security-Policy: defaut-src 'self'; script-src 'self'");
 
+ini_set('display_errors', '0');
+ini_set('display_startup_errors', '0');
+error_reporting(0);
+
 session_start();
 
+$cfg = parse_ini_file('/config.ini');
+$username = $cfg['database_username'];
+$password = $cfg['database_password'];
+
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] =  bin2hex(random_bytes(32));
+}
 
 if (!isset($_SESSION['admin_auth']) || $_SESSION['admin_auth'] !== true) {
     if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
@@ -15,7 +26,7 @@ if (!isset($_SESSION['admin_auth']) || $_SESSION['admin_auth'] !== true) {
     }
 
     try {
-        $db = new PDO("mysql:host=localhost;dbname=u69070", 'u69070', '2731078', [
+        $db = new PDO("mysql:host=localhost;dbname=$username", $username, $password, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
         ]);
@@ -35,17 +46,21 @@ if (!isset($_SESSION['admin_auth']) || $_SESSION['admin_auth'] !== true) {
         $_SESSION['admin_login'] = $_SERVER['PHP_AUTH_USER'];
         
     } catch (PDOException $e) {
-        die("Ошибка базы данных: " . $e->getMessage());
+        die("Ошибка БД!");
     }
 }
 
 try {
-    $db = new PDO("mysql:host=localhost;dbname=u69070", 'u69070', '2731078', [
+    $db = new PDO("mysql:host=localhost;dbname=$username", $username, $password, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
     ]);
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+            die("Недействительный CSRF-токен!");
+        }
+
         if (isset($_POST['delete'])) {
             $db->beginTransaction();
                 
@@ -61,7 +76,8 @@ try {
             $db->commit();
             header("Location: admin.php");
             exit();
-        } elseif (isset($_POST['edit'])) {
+        } 
+        elseif (isset($_POST['edit'])) {
             $stmt = $db->prepare("SELECT r.*, GROUP_CONCAT(l.name) as languages 
                                     FROM requests r 
                                     LEFT JOIN request_languages rl ON r.id = rl.request_id 
@@ -83,7 +99,8 @@ try {
                     'languages' => $userData['languages'] ? explode(',', $userData['languages']) : []
                 ];
             }
-        } elseif (isset($_POST['update'])) {
+        } 
+        elseif (isset($_POST['update'])) {
             $db->beginTransaction();
                 
             $stmt = $db->prepare("UPDATE requests SET 
@@ -134,7 +151,7 @@ try {
     $stmt->execute();
     $languagesStat = $stmt->fetchAll();
 } catch (PDOException $e) {
-    die("Ошибка базы данных: " . $e->getMessage());
+    die("Ошибка БД!");
 }
 ?>
 
@@ -159,6 +176,7 @@ try {
                 <div class="card-header">Редактирование записи #<?= htmlspecialchars($editData['id'], ENT_QUOTES, 'UTF-8') ?></div>
                 <div class="card-body">
                     <form method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
                         <input type="hidden" name="id" value="<?= htmlspecialchars($editData['id'], ENT_QUOTES, 'UTF-8') ?>">
                         
                         <div class="form-group">
@@ -244,10 +262,12 @@ try {
                                 <td>
                                     <div class="action-btns">
                                         <form method="POST" style="display: inline;">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
                                             <input type="hidden" name="edit" value="<?= $request['id'] ?>">
                                             <button type="submit" class="btn">Изменить</button>
                                         </form>
                                         <form method="POST" style="display: inline;" onsubmit="return confirm('Вы уверены, что хотите удалить эту запись?');">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
                                             <input type="hidden" name="delete" value="<?= $request['id'] ?>">
                                             <button type="submit" class="btn btn-danger">Удалить</button>
                                         </form>

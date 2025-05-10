@@ -21,6 +21,7 @@
   <?php if (!empty($_SESSION['login'])): ?>
     <div class="logout">
       <form action="logout.php" method="post">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
         <input type="submit" value="Выйти">
       </form>
     </div>
@@ -28,6 +29,7 @@
   
   <div class="request_form">
     <form id="form" method="POST" action="index.php">
+      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
       <label for="name">Фамилия Имя Отчество:</label>
       <input class="<?= isset($errors['name']) ? 'has-error' : '' ?>" id="name" name="name" placeholder="Введите ФИО" type="text" value="<?=htmlspecialchars($forma['name'] ?? '', ENT_QUOTES, 'UTF-8')?>">
       <br>
